@@ -9,30 +9,42 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-export type IdentifiableObject<T extends ReactNode> = {
+export type IdentifiableObject = {
   id: string;
-  props: {
-    [key: string]: T;
-  };
 };
 
-export type SearchableTableProps<
-  V extends ReactNode,
-  T extends IdentifiableObject<V>
-> = {
-  data: T[];
+export type ExtensibleObject<T extends ReactNode> = {
+  [key: string]: T;
+};
+
+export type Item<T extends ReactNode> = IdentifiableObject & {
+  props: ExtensibleObject<T>;
+};
+
+export type DataSource<T> = (page: number, search?: string) => Promise<T[]>;
+
+export type SearchableTableProps<V extends ReactNode, T extends Item<V>> = {
   keys: string[];
-  onSearch: (searchTerm: string) => Promise<void>;
+  dataSource: DataSource<T>;
 };
 
-export function SearchableTable<
-  V extends ReactNode,
-  T extends IdentifiableObject<V>
->({ data, keys, onSearch }: SearchableTableProps<V, T>) {
-  const handleSearch = useDebouncedCallback(onSearch, 1000);
+export function SearchableTable<V extends ReactNode, T extends Item<V>>({
+  keys,
+  dataSource,
+}: SearchableTableProps<V, T>) {
+  const [items, setItems] = useState<T[]>([]);
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState<string | undefined>("");
+  const handleSearch = useDebouncedCallback((search: string) => {
+    setSearch(search);
+  }, 1000);
+
+  useEffect(() => {
+    (async () => setItems(await dataSource(page, search)))();
+  }, [dataSource, page, search]);
 
   return (
     <>
@@ -60,13 +72,13 @@ export function SearchableTable<
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.map((entry) => (
+            {items?.map((item) => (
               <TableRow
-                key={entry.id}
+                key={item.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                {Object.entries(entry.props).map(([key, value]) => (
-                  <TableCell key={`${entry.id}-${key}`}>{value}</TableCell>
+                {Object.entries(item.props).map(([key, value]) => (
+                  <TableCell key={`${item.id}-${key}`}>{value}</TableCell>
                 ))}
               </TableRow>
             ))}
