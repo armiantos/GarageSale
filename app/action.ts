@@ -74,46 +74,6 @@ export async function createItem(
   return {};
 }
 
-export async function getItems(filter?: string) {
-  if (filter) {
-    const items = await prisma.item.findMany({
-      where: {
-        id: {
-          contains: filter,
-          mode: "insensitive",
-        },
-      },
-      include: {
-        donator: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    return items.map((item) => ({
-      ...item,
-      price: item.price.toNumber(),
-    }));
-  }
-
-  const items = await prisma.item.findMany({
-    include: {
-      donator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  return items.map((item) => ({
-    ...item,
-    price: item.price.toNumber(),
-  }));
-}
-
 export async function getInStockItems(filter?: string) {
   if (filter) {
     const items = await prisma.item.findMany({

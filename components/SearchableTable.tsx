@@ -16,25 +16,23 @@ export type IdentifiableObject = {
   id: string;
 };
 
-export type ExtensibleObject<T extends ReactNode> = {
-  [key: string]: T;
+export type ExtensibleObject = {
+  [key: string]: ReactNode;
 };
 
-export type Item<T extends ReactNode> = IdentifiableObject & {
-  props: ExtensibleObject<T>;
-};
+export type Item = IdentifiableObject & ExtensibleObject;
 
 export type DataSource<T> = (page: number, search?: string) => Promise<T[]>;
 
-export type SearchableTableProps<V extends ReactNode, T extends Item<V>> = {
+export type SearchableTableProps<T extends Item> = {
   keys: string[];
   dataSource: DataSource<T>;
 };
 
-export function SearchableTable<V extends ReactNode, T extends Item<V>>({
+export function SearchableTable<T extends Item>({
   keys,
   dataSource,
-}: SearchableTableProps<V, T>) {
+}: SearchableTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState<string | undefined>("");
@@ -77,8 +75,8 @@ export function SearchableTable<V extends ReactNode, T extends Item<V>>({
                 key={item.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                {Object.entries(item.props).map(([key, value]) => (
-                  <TableCell key={`${item.id}-${key}`}>{value}</TableCell>
+                {keys.map((key) => (
+                  <TableCell key={`${item.id}-${key}`}>{item[key]}</TableCell>
                 ))}
               </TableRow>
             ))}
