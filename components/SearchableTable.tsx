@@ -43,6 +43,7 @@ export function SearchableTable<T extends Item>({
   const [totalPages, setTotalPages] = useState<number>(0);
   const [search, setSearch] = useState<string | undefined>("");
   const handleSearch = useDebouncedCallback((search: string) => {
+    setPage(0);
     setSearch(search);
   }, 1000);
 
@@ -93,12 +94,14 @@ export function SearchableTable<T extends Item>({
           </TableBody>
         </Table>
       </TableContainer>
-      <Pagination
-        count={totalPages}
-        onChange={(_, page) => {
-          setPage(page);
-        }}
-      />
+      {totalPages > 0 && (
+        <Pagination
+          count={totalPages}
+          onChange={(_, page) => {
+            setPage(page);
+          }}
+        />
+      )}
     </>
   );
 }
