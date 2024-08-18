@@ -1,7 +1,9 @@
 "use client";
 
+import { DEFAULT_PAGE_SIZE } from "@/config";
 import SearchRounded from "@mui/icons-material/SearchRounded";
 import InputAdornment from "@mui/material/InputAdornment";
+import Pagination from "@mui/material/Pagination";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -22,7 +24,10 @@ export type ExtensibleObject = {
 
 export type Item = IdentifiableObject & ExtensibleObject;
 
-export type DataSource<T> = (page: number, search?: string) => Promise<T[]>;
+export type DataSource<T> = (
+  page: number,
+  search?: string
+) => Promise<{ values: T[]; totalRecordCount: number }>;
 
 export type SearchableTableProps<T extends Item> = {
   keys: string[];
@@ -35,13 +40,18 @@ export function SearchableTable<T extends Item>({
 }: SearchableTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const [search, setSearch] = useState<string | undefined>("");
   const handleSearch = useDebouncedCallback((search: string) => {
     setSearch(search);
   }, 1000);
 
   useEffect(() => {
-    (async () => setItems(await dataSource(page, search)))();
+    (async () => {
+      const { values, totalRecordCount } = await dataSource(page, search);
+      setTotalPages(Math.ceil(totalRecordCount / DEFAULT_PAGE_SIZE));
+      setItems(values);
+    })();
   }, [dataSource, page, search]);
 
   return (
@@ -83,6 +93,7 @@ export function SearchableTable<T extends Item>({
           </TableBody>
         </Table>
       </TableContainer>
+      <Pagination count={totalPages} />
     </>
   );
 }
