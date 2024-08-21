@@ -52,7 +52,7 @@ export function SearchableTable<T extends Item>({
   useEffect(() => {
     (async () => {
       const { values, totalRecordCount } = await dataSource(page, search);
-      setTotalPages(Math.floor(totalRecordCount / DEFAULT_PAGE_SIZE));
+      setTotalPages(Math.ceil(totalRecordCount / DEFAULT_PAGE_SIZE));
       setItems(values);
     })();
   }, [dataSource, page, search]);
@@ -99,11 +99,11 @@ export function SearchableTable<T extends Item>({
           </TableBody>
         </Table>
       </TableContainer>
-      {totalPages > 0 && (
+      {totalPages > 1 && (
         <Pagination
           count={totalPages}
           onChange={(_, page) => {
-            setPage(page);
+            setPage(page - 1);
           }}
         />
       )}
