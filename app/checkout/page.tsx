@@ -6,9 +6,6 @@ import Loading from "../items/loading";
 import { Suspense, useState, useEffect, ChangeEvent } from "react";
 import ItemsList from "./itemsList";
 import TextField from "@mui/material/TextField";
-import SearchRounded from "@mui/icons-material/SearchRounded";
-import InputAdornment from "@mui/material/InputAdornment";
-import { useDebouncedCallback } from "use-debounce";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
@@ -19,24 +16,19 @@ import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import { addTransaction } from "../action"; // Adjust the path as necessary
-import { Item } from "@prisma/client";
+import { addTransaction } from "../action";
+import { getInStockItems } from "./action";
 
-type SerializableItem = Omit<Item, "price"> & { price: number };
-type CartItem = SerializableItem & { quantity: number };
+type Item = Awaited<ReturnType<typeof getInStockItems>>["values"][0];
+type CartItem = Item & { quantity: number };
 
 export default function Checkout() {
-  const [filter, setFilter] = useState<string>();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [discount, setDiscount] = useState<string>();
   const [paymentMethod, setPaymentMethod] = useState("Interac");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const handleSearch = useDebouncedCallback((query: string) => {
-    setFilter(query);
-  }, 500);
 
   useEffect(() => {
     const stringifiedCart = localStorage.getItem("cart");
@@ -46,13 +38,12 @@ export default function Checkout() {
     }
     const cart = JSON.parse(stringifiedCart) || [];
     setCart(cart);
-    
+
     let _discount = 0;
     if (discount !== undefined) {
       try {
         _discount = parseFloat(discount);
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     calculateTotalPrice(cart, _discount);
   }, []);
@@ -66,7 +57,7 @@ export default function Checkout() {
     setTotalPrice(discountedTotal > 0 ? discountedTotal : 0);
   };
 
-  const updateItemQuantity = (item: SerializableItem, increment: boolean) => {
+  const updateItemQuantity = (item: Item, increment: boolean) => {
     let updatedCart = [...cart];
     const index = updatedCart.findIndex((cartItem) => cartItem.id === item.id);
 
@@ -90,17 +81,16 @@ export default function Checkout() {
     if (discount !== undefined) {
       try {
         _discount = parseFloat(discount);
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     calculateTotalPrice(updatedCart, _discount);
   };
 
-  const handleAddItem = (item: SerializableItem) => {
+  const handleAddItem = (item: Item) => {
     updateItemQuantity(item, true);
   };
 
-  const handleRemoveItem = (item: SerializableItem) => {
+  const handleRemoveItem = (item: Item) => {
     updateItemQuantity(item, false);
   };
 
@@ -145,24 +135,10 @@ export default function Checkout() {
         <Typography variant="h5" sx={{ marginBottom: 5 }}>
           Checkout
         </Typography>
-        <Paper sx={{ maxWidth: "lg" }}>
-          <TextField
-            id="search"
-            label="Search"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchRounded />
-                </InputAdornment>
-              ),
-            }}
-            variant="standard"
-            onChange={(e) => handleSearch(e.target.value)}
-          />
 
+        <Paper>
           <Suspense fallback={<Loading />}>
             <ItemsList
-              filter={filter}
               onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
             />
