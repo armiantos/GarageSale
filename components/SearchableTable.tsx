@@ -32,13 +32,13 @@ export type DataSource<T> = (
 export type SearchableTableProps<T extends Item> = {
   keys: string[];
   dataSource: DataSource<T>;
-  additionalColumnRenderer?: (item: T) => ReactNode;
+  additionalColumns: [string, (item: T) => ReactNode][];
 };
 
 export function SearchableTable<T extends Item>({
   keys,
   dataSource,
-  additionalColumnRenderer
+  additionalColumns,
 }: SearchableTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [page, setPage] = useState(0);
@@ -77,9 +77,11 @@ export function SearchableTable<T extends Item>({
         <Table aria-label="Items">
           <TableHead>
             <TableRow>
-              {keys.map((key) => (
-                <TableCell key={key}>{key}</TableCell>
-              ))}
+              {keys
+                .concat(additionalColumns.map(([column, _]) => column))
+                .map((key) => (
+                  <TableCell key={key}>{key}</TableCell>
+                ))}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -91,7 +93,7 @@ export function SearchableTable<T extends Item>({
                 {keys.map((key) => (
                   <TableCell key={`${item.id}-${key}`}>{item[key]}</TableCell>
                 ))}
-                {additionalColumnRenderer !== undefined && additionalColumnRenderer(item)}
+                {additionalColumns?.map(([_, renderer]) => renderer(item))}
               </TableRow>
             ))}
           </TableBody>

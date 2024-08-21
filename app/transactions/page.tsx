@@ -10,7 +10,7 @@ import { getTransactions } from "./action";
 type Transaction = Awaited<ReturnType<typeof getTransactions>>["values"][0];
 
 export default function TransactionsList() {
-  const additionalColumnRenderer = (transaction: Transaction) => (
+  const itemsRenderer = (transaction: Transaction) => (
     <TableCell>
       <ul>
         {transaction.itemsSerialized.map((serializedItem, index) => (
@@ -30,7 +30,7 @@ export default function TransactionsList() {
         <SearchableTable
           dataSource={getTransactions}
           keys={["id", "paymentMethod", "totalPrice"]}
-          additionalColumnRenderer={additionalColumnRenderer}
+          additionalColumns={[["items", itemsRenderer]]}
         />
       </Paper>
     </Box>
