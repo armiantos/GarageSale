@@ -74,94 +74,6 @@ export async function createItem(
   return {};
 }
 
-export async function getItems(filter?: string) {
-  if (filter) {
-    const items = await prisma.item.findMany({
-      where: {
-        id: {
-          contains: filter,
-          mode: "insensitive",
-        },
-      },
-      include: {
-        donator: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    return items.map((item) => ({
-      ...item,
-      price: item.price.toNumber(),
-    }));
-  }
-
-  const items = await prisma.item.findMany({
-    include: {
-      donator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  return items.map((item) => ({
-    ...item,
-    price: item.price.toNumber(),
-  }));
-}
-
-export async function getInStockItems(filter?: string) {
-  if (filter) {
-    const items = await prisma.item.findMany({
-      where: {
-        id: {
-          contains: filter,
-          mode: "insensitive",
-        },
-        stock: {
-          gt: 0,
-        },
-      },
-      include: {
-        donator: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    return items.map((item) => ({
-      ...item,
-      price: item.price.toNumber(),
-    }));
-  }
-
-  const items = await prisma.item.findMany({
-    where: {
-      stock: {
-        gt: 0,
-      },
-    },
-    include: {
-      donator: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  return items.map((item) => ({
-    ...item,
-    price: item.price.toNumber(),
-  }));
-}
-
 export async function addTransaction(
   cart: any[],
   totalPrice: number,
@@ -205,23 +117,4 @@ export async function addTransaction(
   }
 
   return {};
-}
-
-export async function getTransactions() {
-  const transactions = await prisma.transaction.findMany({
-    include: {
-      TransactionItem: {
-        include: {
-          item: true, // Include the related items for each transaction item
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return transactions.map((transaction) => ({
-    ...transaction,
-    totalPrice: transaction.totalPrice.toNumber(),
-  }));
 }
