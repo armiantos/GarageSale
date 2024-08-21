@@ -38,6 +38,7 @@ export async function getTransactions(page: number, search?: string) {
 
   const values = transactions.map((transaction) => ({
     id: transaction.id.toString(),
+    paymentMethod: transaction.paymentMethod,
     totalPrice: transaction.totalPrice.toNumber(),
     itemsSerialized: transaction.TransactionItem.map(
       (transactionItem) =>
