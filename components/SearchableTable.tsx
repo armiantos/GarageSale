@@ -93,7 +93,7 @@ export function SearchableTable<T extends Item>({
                 {keys.map((key) => (
                   <TableCell key={`${item.id}-${key}`}>{item[key]}</TableCell>
                 ))}
-                {additionalColumns?.map(([_, renderer]) => renderer(item))}
+                {additionalColumns?.map(([columnName, renderer]) => <TableCell key={`${item.id}-${columnName}}`}>{renderer(item)}</TableCell>)}
               </TableRow>
             ))}
           </TableBody>

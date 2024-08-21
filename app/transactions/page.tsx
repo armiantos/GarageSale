@@ -11,13 +11,11 @@ type Transaction = Awaited<ReturnType<typeof getTransactions>>["values"][0];
 
 export default function TransactionsList() {
   const itemsRenderer = (transaction: Transaction) => (
-    <TableCell>
-      <ul>
-        {transaction.itemsSerialized.map((serializedItem, index) => (
-          <li key={index}>{serializedItem}</li>
-        ))}
-      </ul>
-    </TableCell>
+    <ul>
+      {transaction.itemsSerialized.map((serializedItem, index) => (
+        <li key={index}>{serializedItem}</li>
+      ))}
+    </ul>
   );
 
   return (
