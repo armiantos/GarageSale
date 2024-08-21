@@ -93,12 +93,17 @@ export function SearchableTable<T extends Item>({
                 {keys.map((key) => (
                   <TableCell key={`${item.id}-${key}`}>{item[key]}</TableCell>
                 ))}
-                {additionalColumns?.map(([columnName, renderer]) => <TableCell key={`${item.id}-${columnName}}`}>{renderer(item)}</TableCell>)}
+                {additionalColumns?.map(([columnName, renderer]) => (
+                  <TableCell key={`${item.id}-${columnName}}`}>
+                    {renderer(item)}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
       {totalPages > 1 && (
         <Pagination
           count={totalPages}
