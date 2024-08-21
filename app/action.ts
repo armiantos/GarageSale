@@ -118,22 +118,3 @@ export async function addTransaction(
 
   return {};
 }
-
-export async function getTransactions() {
-  const transactions = await prisma.transaction.findMany({
-    include: {
-      TransactionItem: {
-        include: {
-          item: true, // Include the related items for each transaction item
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  return transactions.map((transaction) => ({
-    ...transaction,
-    totalPrice: transaction.totalPrice.toNumber(),
-  }));
-}
