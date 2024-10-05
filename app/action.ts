@@ -15,7 +15,7 @@ type _salesByPaymentMethod = {
   paymentMethod: string;
 };
 
-type SalesByPaymentMethod = {
+export type SalesByPaymentMethod = {
   createdAt: Date;
   sum: number;
   paymentMethod: string;
