@@ -12,7 +12,7 @@ export default async function Home() {
       <Typography variant="h2">Total</Typography>
       {salesByMethodAndTime.map((sale) => (
         <Typography key={`${sale.paymentMethod}-${sale.createdAt}`}>
-          {sale.createdAt.toDateString()} - {sale.paymentMethod} - ${sale._sum.totalPrice?.toNumber()}
+          {sale.createdAt.toDateString()} - {sale.paymentMethod} - ${sale.sum}
         </Typography>
       ))}
     </>

@@ -9,13 +9,25 @@ export async function getDonators() {
   return prisma.donator.findMany();
 }
 
-export async function getSalesByDayAndType() {
-  return await prisma.transaction.groupBy({
-    by: ['paymentMethod', 'createdAt'],
-    _sum: {
-      totalPrice: true
-    }
-  });
+type _salesByPaymentMethod = {
+  createdAt: Date;
+  sum: Decimal;
+  paymentMethod: string;
+};
+
+type SalesByPaymentMethod = {
+  createdAt: Date;
+  sum: number;
+  paymentMethod: string;
+};
+
+export async function getSalesByDayAndType(): Promise<SalesByPaymentMethod[]> {
+  let salesByDayAndType: _salesByPaymentMethod[] =
+    await prisma.$queryRaw`select t."paymentMethod",sum(t."totalPrice"), date_trunc('day', t."createdAt" AT TIME ZONE 'US/Pacific') "createdAt" from "Transaction" t group by "paymentMethod", date_trunc('day', t."createdAt" AT TIME ZONE 'US/Pacific');`;
+  return salesByDayAndType.map((saleByDayAndType) => ({
+    ...saleByDayAndType,
+    sum: saleByDayAndType.sum.toNumber(),
+  }));
 }
 
 function itemFormToItemAndDonator(
