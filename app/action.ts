@@ -9,6 +9,15 @@ export async function getDonators() {
   return prisma.donator.findMany();
 }
 
+export async function getSalesByDayAndType() {
+  return await prisma.transaction.groupBy({
+    by: ['paymentMethod', 'createdAt'],
+    _sum: {
+      totalPrice: true
+    }
+  });
+}
+
 function itemFormToItemAndDonator(
   formData: FormData
 ): [Omit<Item, "donatorId">, string] {
